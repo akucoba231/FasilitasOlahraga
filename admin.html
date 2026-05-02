@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Management System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- MENGHUBUNGKAN KE BACKEND MOCK -->
+    <script src="api-layanan.js"></script>
+
+    <style>
+        :root {
+            --primary: #23438a; --accent: #f26522; --bg: #f1f5f9; --white: #ffffff;
+            --success: #22c55e; --danger: #ef4444; --warning: #eab308;
+        }
+        * { box-sizing: border-box; }
+        
+        /* Body tidak lagi menggunakan flex agar layout fixed sidebar tidak bentrok */
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; color: #333; overflow-x: hidden; }
+        
+        /* Sidebar (Responsive Drawer) */
+        .sidebar { 
+            width: 260px; height: 100vh; background: var(--primary); color: white; 
+            padding: 20px; position: fixed; top: 0; left: 0; z-index: 1000; 
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            overflow-y: auto;
+        }
+        .sidebar h2 { font-size: 1.2rem; margin-top: 0; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; display: flex; align-items: center; justify-content: space-between; gap:10px; }
+        .nav-item { padding: 12px; cursor: pointer; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; display: flex; align-items: center; gap: 10px; font-size: 15px;}
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.15); border-left: 4px solid var(--accent); }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; min-height: 100vh; padding: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-box { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+        .stat-box h4 { margin: 0 0 10px 0; color: #666; font-size: 14px; font-weight: normal; }
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; min-width: 800px; border-collapse: collapse; margin-top: 15px; font-size: 14px;}
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; }
+        th { background: #f8fafc; color: #666;}
+        .badge { padding: 6px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; display: inline-block; text-align: center;}
+        
+        .bg-success { background: #dcfce7; color: #166534; }
+        .bg-warning { background: #fef9c3; color: #854d0e; }
+        .bg-info { background: #e0f2fe; color: #075985; }
+        .bg-danger { background: #fee2e2; color: #991b1b; }
+
+        /* Form Styling */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; color: #555;}
+        input[type="text"], input[type="email"], input[type="date"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;}
+        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; transition: 0.2s;}
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: #1e3a6d; }
+
+        /* Action Buttons */
+        .action-group { display: flex; flex-direction: column; gap: 5px; }
+        .btn-action { padding: 6px 10px; border-radius: 4px; border: none; cursor: pointer; font-size: 12px; font-weight: 600; color: white; width: 100%; display: flex; justify-content: center; align-items: center; gap: 5px;}
+        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-view { background: var(--primary); }
+        .btn-acc { background: var(--success); }
+        .btn-rej { background: var(--danger); }
+
+        /* Checkbox Grid */
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; background: #f8fafc; padding: 15px; border-radius: 6px; border: 1px solid #ddd;}
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;}
+        .checkbox-item input { cursor: pointer; }
+
+        /* Modal Info */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1050; opacity: 0; pointer-events: none; transition: 0.3s; padding: 20px;}
+        .modal-overlay.active { opacity: 1; pointer-events: all; }
+        .modal-box { background: white; width: 100%; max-width: 400px; border-radius: 12px; overflow: hidden; transform: translateY(-20px); transition: 0.3s; }
+        .modal-overlay.active .modal-box { transform: translateY(0); }
+        .modal-header { padding: 15px 20px; background: #f8fafc; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: var(--primary);}
+        .modal-body { padding: 20px; font-size: 14px; line-height: 1.6;}
+
+        /* Mobile Header */
+        .mobile-header { display: none; background: var(--primary); color: white; padding: 15px 20px; justify-content: space-between; align-items: center; position: sticky; top:0; z-index: 990; box-shadow: 0 2px 4px rgba(0,0,0,0.1);}
+        
+        .hidden { display: none !important; }
+
+        /* ===== PENGATURAN KHUSUS MOBILE (TARGET 360x720) ===== */
+        @media (max-width: 768px) {
+            .sidebar { 
+                transform: translateX(-100%); 
+                box-shadow: none;
+            }
+            .sidebar.active { 
+                transform: translateX(0); 
+                /* Efek gelap (overlay) untuk menutup sisa 1/4 layar halaman */
+                box-shadow: 0 0 0 100vw rgba(0,0,0,0.5); 
+            }
+            #close-sidebar { display: block !important; } /* Tampilkan tombol X di mobile */
+            
+            .main-content { margin-left: 0; padding: 15px; }
+            .mobile-header { display: flex; }
+            
+            /* Pada layar 360px kotak stats dibuat berjejer ke bawah agar rapi */
+            .stats-grid { grid-template-columns: 1fr; gap: 15px; }
+            .card { padding: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+        <h3 style="margin:0;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h3>
+        <i class="fa-solid fa-bars" style="font-size: 20px; cursor: pointer;" onclick="toggleSidebar()"></i>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin:0; border:none; padding:0;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h2>
+            <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer; display: none;" onclick="toggleSidebar()" id="close-sidebar"></i>
+        </div>
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        
+        <div class="nav-item active" onclick="showSection('dashboard')"><i class="fas fa-home"></i> Dashboard</div>
+        <div class="nav-item" onclick="showSection('member')"><i class="fas fa-users"></i> Daftar Member</div>
+        <div class="nav-item" onclick="showSection('event')"><i class="fas fa-calendar-star"></i> Blokir Event</div>
+        
+        <!-- Pemisah Visual -->
+        <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+        
+        <!-- Tombol Kembali ke Halaman Publik -->
+        <div class="nav-item" style="background: rgba(255,255,255,0.1);" onclick="window.location.href='index.html'">
+            <i class="fas fa-globe"></i> Lihat Website
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- SEKSI: DASHBOARD TRANSAKSI -->
+        <section id="sec-dashboard">
+            <div class="stats-grid">
+                <div class="stat-box"><h4>Total Booking</h4><p id="stat-total" style="font-size: 24px; font-weight: bold; color: var(--primary); margin:0;">0</p></div>
+                <div class="stat-box"><h4>Menunggu Konfirmasi</h4><p id="stat-pending" style="font-size: 24px; font-weight: bold; color: var(--warning); margin:0;">0</p></div>
+                <div class="stat-box"><h4>Jadwal Member</h4><p id="stat-member" style="font-size: 24px; font-weight: bold; color: var(--success); margin:0;">0</p></div>
+            </div>
+
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0; color: var(--primary);">Daftar Pesanan Lapangan</h3>
+                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="muatData()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table id="table-transaksi">
+                        <thead>
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <th>Pelanggan</th>
+                                <th>Jadwal & Lapangan</th>
+                                <th>Total Bayar</th>
+                                <th>Status</th>
+                                <th style="text-align: center; width: 120px;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Diisi via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEKSI: TAMBAH MEMBER -->
+        <section id="sec-member" class="hidden">
+            <div class="card" style="max-width: 600px;">
+                <h3 style="color: var(--primary); margin-top: 0;">Pendaftaran Member Baru (Tenis)</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px; padding: 10px; background: #e0f2fe; border-radius: 6px;">
+                    <i class="fa-solid fa-circle-info"></i> Mendaftarkan member otomatis akan mem-booking slot waktu yang sama untuk <strong>4 minggu berturut-turut</strong> ke depan.
+                </p>
+
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="mbr-nama" placeholder="Contoh: Budi Santoso" required>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>WhatsApp</label>
+                        <input type="text" id="mbr-wa" placeholder="0812..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email <small>(Untuk Sinkronisasi)</small></label>
+                        <input type="email" id="mbr-email" placeholder="budi@email.com" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Tanggal Mulai Sesi 1</label>
+                        <input type="date" id="mbr-tgl" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Pilih Slot Waktu (Tenis)</label>
+                        <select id="mbr-slot">
+                            <option value="06.00 - 09.00" data-price="250000">06.00 - 09.00 (Rp 250.000/bln)</option>
+                            <option value="09.00 - 12.00" data-price="250000">09.00 - 12.00 (Rp 250.000/bln)</option>
+                            <option value="12.00 - 15.00" data-price="300000">12.00 - 15.00 (Rp 300.000/bln)</option>
+                            <option value="15.00 - 18.00" data-price="300000">15.00 - 18.00 (Rp 300.000/bln)</option>
+                            <option value="18.00 - 21.00" data-price="350000">18.00 - 21.00 (Rp 350.000/bln)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="simpanMember()">Daftarkan Member Sekarang</button>
+            </div>
+        </section>
+
+        <!-- SEKSI: SPECIAL EVENT -->
+        <section id="sec-event" class="hidden">
+            <div class="card" style="max-width: 600px;">
+                <h3 style="color: var(--primary); margin-top: 0;">Blokir Lapangan (Special Event)</h3>
+                <p style="font-size: 13px; color: #666; margin-bottom: 20px; padding: 10px; background: #fef9c3; border-radius: 6px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Fitur ini digunakan untuk mengunci jadwal lapangan karena ada acara internal/event, sehingga publik tidak bisa memesannya.
+                </p>
+
+                <div class="form-group">
+                    <label>Nama Event / Penanggung Jawab</label>
+                    <input type="text" id="evt-nama" placeholder="Contoh: Pertandingan Antar Kampus" required>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="form-group">
+                        <label>Pilih Lapangan</label>
+                        <select id="evt-lap" onchange="generateCheckboxJam()">
+                            <option value="TNS-01">Tenis 1</option>
+                            <option value="TNS-02">Tenis 2</option>
+                            <option value="FUT-01">Futsal (Multiguna)</option>
+                            <option value="BSK-01">Basket (Multiguna)</option>
+                            <option value="VOL-01">Voli (Multiguna)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tanggal Acara</label>
+                        <input type="date" id="evt-tgl" required>
+                    </div>
+                </div>
+
+                <!-- Checkbox untuk jam -->
+                <div class="form-group">
+                    <label>Pilih Jam yang Ingin Diblokir (Bisa Pilih Banyak)</label>
+                    <div class="checkbox-grid" id="container-jam-event">
+                        <!-- Diisi via JS -->
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="simpanEvent()">Kunci Jadwal Lapangan</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL DETAIL PEMESANAN (Untuk Tombol "Lihat") -->
+    <div class="modal-overlay" id="modal-info">
+        <div class="modal-box">
+            <div class="modal-header">
+                Detail Pesanan <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="tutupModal()"></i>
+            </div>
+            <div class="modal-body" id="modal-content">
+                <!-- Data diisi via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- UI LOGIC ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+        }
+
+	// --- MENUTUP SIDEBAR SAAT KLIK DI LUAR MENU (MOBILE) ---
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const hamburgerBtn = document.querySelector('.mobile-header .fa-bars');
+    
+    // Pastikan ini hanya berjalan di mode mobile (lebar layar <= 768px) dan sidebar sedang terbuka
+    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+        // Jika elemen yang diklik BUKAN bagian dari sidebar DAN BUKAN tombol hamburger
+        if (!sidebar.contains(event.target) && event.target !== hamburgerBtn) {
+            toggleSidebar(); // Panggil fungsi untuk menutup menu
+        }
+    }
+});	
+
+        function showSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('sec-' + id).classList.remove('hidden');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('active'); }
+            if (id === 'dashboard') muatData();
+            if (id === 'event') generateCheckboxJam(); // Render jam sesuai lapangan yg terpilih
+        }
+
+        // --- DASHBOARD & TABLE ---
+        async function muatData() {
+            const data = await BackendAPI.getAllPesanan();
+            const tbody = document.querySelector('#table-transaksi tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px;">Belum ada data transaksi.</td></tr>';
+                return;
+            }
+
+            let countMenunggu = 0;
+            let countMember = 0;
+
+            data.forEach(p => {
+                const tr = document.createElement('tr');
+                
+                // Pewarnaan Badge Status
+                let badgeClass = 'bg-info';
+                if (p.status_pesanan.includes('Sukses')) badgeClass = 'bg-success';
+                else if (p.status_pesanan.includes('Menunggu') || p.status_pesanan.includes('Belum')) { badgeClass = 'bg-warning'; countMenunggu++; }
+                else if (p.status_pesanan.includes('Batal')) badgeClass = 'bg-danger';
+
+                // Tipe Booking
+                if (p.tipe_booking === 'Member Tetap') countMember++;
+                const isSelesai = (p.status_pesanan === "Batal Booking" || p.status_pesanan === "Booking Sukses");
+
+                tr.innerHTML = `
+                    <td><strong>${p.id_pemesanan}</strong><br><small style="color:#666;">${p.tipe_booking}</small></td>
+                    <td>
+                        <div style="font-weight: 600;">${p.nama_pelanggan}</div>
+                        <div style="font-size: 12px; color: #666;"><i class="fa-brands fa-whatsapp"></i> ${p.no_whatsapp||'-'}</div>
+                    </td>
+                    <td>
+                        <div style="color: var(--primary); font-weight: 600;">${p.id_lapangan}</div>
+                        <div style="font-size: 12px; color: #666;"><i class="fa-regular fa-calendar"></i> ${p.tanggal_main}</div>
+                    </td>
+                    <td style="font-weight: 600;">Rp ${p.total_bayar.toLocaleString('id-ID')}</td>
+                    <td><span class="badge ${badgeClass}">${p.status_pesanan}</span></td>
+                    <td>
+                        <div class="action-group">
+                            <button class="btn-action btn-view" onclick="bukaModal('${p.id_pemesanan}')"><i class="fa-solid fa-eye"></i> Lihat</button>
+                            <button class="btn-action btn-acc" onclick="ubahStatus('${p.id_pemesanan}', 'Booking Sukses')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-check"></i> Terima</button>
+                            <button class="btn-action btn-rej" onclick="ubahStatus('${p.id_pemesanan}', 'Batal Booking')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-xmark"></i> Tolak</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Update Statistik
+            document.getElementById('stat-total').innerText = data.length;
+            document.getElementById('stat-pending').innerText = countMenunggu;
+            document.getElementById('stat-member').innerText = countMember;
+        }
+
+        async function ubahStatus(id, statusBaru) {
+            const actionText = statusBaru === 'Booking Sukses' ? 'MENERIMA' : 'MEMBATALKAN';
+            if(confirm(`Yakin ingin ${actionText} pesanan ${id}?`)) {
+                await BackendAPI.updateStatus(id, statusBaru);
+                muatData();
+            }
+        }
+
+        // --- MODAL INFO ---
+        async function bukaModal(id) {
+            const semuaPesanan = await BackendAPI.getAllPesanan();
+            const p = semuaPesanan.find(x => x.id_pemesanan === id);
+            if(!p) return;
+
+            const content = `
+                <div style="margin-bottom:15px;">
+                    <div style="color:#666; font-size:12px;">ID Pesanan & Tipe</div>
+                    <div style="font-weight:bold;">${p.id_pemesanan} (${p.tipe_booking})</div>
+                </div>
+                <div style="margin-bottom:15px; padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #eee;">
+                    <div style="font-weight:bold; margin-bottom:5px; color:var(--primary);">Data Pemesan</div>
+                    <div>👤 Nama: ${p.nama_pelanggan}</div>
+                    <div>📞 WhatsApp: ${p.no_whatsapp || '-'}</div>
+                    <div>✉️ Email: ${p.email_pelanggan || '-'}</div>
+                </div>
+                <div style="margin-bottom:15px;">
+                    <div style="color:#666; font-size:12px;">Detail Lapangan</div>
+                    <div>Lapangan: <strong>${p.id_lapangan}</strong></div>
+                    <div>Tanggal: <strong>${p.tanggal_main}</strong></div>
+                    <div>Jam: <strong>${p.waktu_main.join(', ')}</strong></div>
+                </div>
+                <div style="border-top:1px solid #ddd; padding-top:10px; margin-top:15px; font-weight:bold; font-size:16px;">
+                    Total Bayar: Rp ${p.total_bayar.toLocaleString('id-ID')}
+                </div>
+            `;
+            
+            document.getElementById('modal-content').innerHTML = content;
+            document.getElementById('modal-info').classList.add('active');
+        }
+
+        function tutupModal() {
+            document.getElementById('modal-info').classList.remove('active');
+        }
+
+        // --- FORM MEMBER ---
+        async function simpanMember() {
+            const nama = document.getElementById('mbr-nama').value;
+            const wa = document.getElementById('mbr-wa').value;
+            const email = document.getElementById('mbr-email').value; 
+            const tgl = document.getElementById('mbr-tgl').value;
+            const select = document.getElementById('mbr-slot');
+            
+            if(!nama || !wa || !email || !tgl) { alert('Harap isi semua data diri dan tanggal!'); return; }
+
+            const data = {
+                nama_pelanggan: nama,
+                no_whatsapp: wa,
+                email_pelanggan: email, 
+                id_lapangan: 'TNS-01', 
+                tanggal_mulai: tgl,
+                waktu_main: [select.value],
+                total_harga: parseInt(select.options[select.selectedIndex].dataset.price)
+            };
+
+            document.querySelector('#sec-member .btn-primary').innerText = "Memproses...";
+
+            try {
+                const res = await BackendAPI.buatPesananMember(data);
+                alert('Member Berhasil Didaftarkan!\nSistem telah mengunci jadwal untuk 4 minggu ke depan dengan ID: ' + res.id_member);
+                
+                // Reset Form
+                document.getElementById('mbr-nama').value = '';
+                document.getElementById('mbr-wa').value = '';
+                document.getElementById('mbr-email').value = '';
+                document.getElementById('mbr-tgl').value = '';
+                
+                // Pindah Tampilan
+                document.querySelector('#sec-member .btn-primary').innerText = "Daftarkan Member Sekarang";
+                showSection('dashboard');
+            } catch(e) { 
+                alert(e); 
+                document.querySelector('#sec-member .btn-primary').innerText = "Daftarkan Member Sekarang";
+            }
+        }
+
+        // --- FORM EVENT ---
+        function generateCheckboxJam() {
+            const idLap = document.getElementById('evt-lap').value;
+            const container = document.getElementById('container-jam-event');
+            
+            // Tentukan pilihan jam berdasarkan jenis lapangan
+            const isTenis = idLap.startsWith('TNS');
+            const arrayJam = isTenis 
+                ? ["06.00 - 09.00", "09.00 - 12.00", "12.00 - 15.00", "15.00 - 18.00", "18.00 - 21.00"] 
+                : ["09.00 - 10.00", "10.00 - 11.00", "11.00 - 12.00", "12.00 - 13.00", "13.00 - 14.00", "14.00 - 15.00", "15.00 - 16.00", "16.00 - 17.00", "17.00 - 18.00", "18.00 - 19.00", "19.00 - 20.00", "20.00 - 21.00"];
+
+            let html = '';
+            arrayJam.forEach(jam => {
+                html += `<label class="checkbox-item">
+                            <input type="checkbox" value="${jam}" class="chk-jam"> ${jam}
+                         </label>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function simpanEvent() {
+            const nama = document.getElementById('evt-nama').value;
+            const tgl = document.getElementById('evt-tgl').value;
+            const lap = document.getElementById('evt-lap').value;
+            
+            // Ambil semua checkbox yang dicentang
+            const checkedBoxes = document.querySelectorAll('.chk-jam:checked');
+            const selectedHours = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if(!nama || !tgl) { alert("Nama event dan tanggal harus diisi!"); return; }
+            if(selectedHours.length === 0) { alert("Pilih minimal 1 jam untuk diblokir!"); return; }
+
+            const data = {
+                nama_event: nama,
+                email_pelanggan: "admin@sistem.com", 
+                no_whatsapp: "-", 
+                id_lapangan: lap,
+                tanggal_main: tgl,
+                waktu_main: selectedHours
+            };
+
+            document.querySelector('#sec-event .btn-primary').innerText = "Memproses...";
+
+            try {
+                await BackendAPI.buatSpecialEvent(data);
+                alert('Jadwal Berhasil Diblokir untuk Event!');
+                
+                document.getElementById('evt-nama').value = '';
+                document.getElementById('evt-tgl').value = '';
+                
+                document.querySelector('#sec-event .btn-primary').innerText = "Kunci Jadwal Lapangan";
+                showSection('dashboard');
+            } catch(e) { 
+                alert(e); 
+                document.querySelector('#sec-event .btn-primary').innerText = "Kunci Jadwal Lapangan";
+            }
+        }
+
+        // --- INISIALISASI AWAL ---
+        window.onload = muatData;
+    </script>
+</body>
+</html>

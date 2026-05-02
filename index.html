@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Informasi Fasilitas Olahraga</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- MENGHUBUNGKAN KE BACKEND MOCK -->
+    <script src="api-layanan.js"></script>
+
+    <style>
+        /* ================= VARIABLES & RESET ================= */
+        :root {
+            --primary-blue: #23438a;
+            --secondary-blue: #3366cc;
+            --accent-orange: #f26522;
+            --success-green: #22c55e;
+            --text-dark: #333333;
+            --text-light: #666666;
+            --bg-body: #f4f7fb;
+            --white: #ffffff;
+            --border-color: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-dark); line-height: 1.6; overflow-x: hidden; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Montserrat', sans-serif; }
+        a { text-decoration: none; color: inherit; }
+        ul { list-style: none; }
+
+        /* ================= UTILITIES ================= */
+        .container { max-width: 1200px; width: 90%; margin: 0 auto; }
+        .section-title { text-align: center; margin-bottom: 40px; }
+        .section-title h2 { color: var(--primary-blue); font-size: clamp(22px, 4vw, 28px); margin-bottom: 10px; }
+        .section-title p { color: var(--text-light); font-size: 15px; }
+        .hidden { display: none !important; }
+
+        /* ================= NAVBAR ================= */
+        header { position: absolute; top: 0; left: 0; width: 100%; padding: 20px 0; z-index: 100; }
+        nav { display: flex; justify-content: space-between; align-items: center; color: var(--white); position: relative; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: clamp(18px, 3vw, 22px); font-weight: 700; cursor: pointer; }
+        .logo-icon { color: #4db8ff; font-size: 24px; }
+        .nav-links { display: flex; align-items: center; gap: 30px; }
+        .nav-links li a { font-size: 14px; font-weight: 500; transition: all 0.3s ease; }
+        .nav-links li a:not(.btn-nav-cta):hover { color: var(--accent-orange); }
+        
+        .btn-nav-cta {
+            background: linear-gradient(to right, #f26522, #f9844a); color: var(--white) !important;
+            padding: 10px 24px !important; border-radius: 50px; font-weight: 600 !important;
+            box-shadow: 0 4px 10px rgba(242, 101, 34, 0.3); display: inline-block;
+        }
+        .btn-nav-cta:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(242, 101, 34, 0.4); }
+        .nav-icons { display: flex; gap: 20px; }
+        .nav-icons i { cursor: pointer; transition: color 0.3s; }
+        .nav-icons i:hover { color: var(--accent-orange); }
+        .mobile-toggle { display: none; font-size: 24px; cursor: pointer; }
+
+        /* ================= HERO SECTION ================= */
+        .hero {
+            position: relative;
+            background: linear-gradient(rgba(35, 67, 138, 0.7), rgba(35, 67, 138, 0.6)), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            padding: 180px 0 150px; text-align: center; color: var(--white);
+        }
+        .hero h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 700; margin-bottom: 15px; }
+        .hero p { font-size: clamp(16px, 3vw, 20px); font-weight: 500; font-style: italic; margin-bottom: 40px; }
+        .hero-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;}
+        .btn { padding: 12px 30px; border-radius: 6px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s ease; border: none; white-space: nowrap; }
+        .btn-orange { background: linear-gradient(to right, #f26522, #f9844a); color: var(--white); box-shadow: 0 4px 15px rgba(242, 101, 34, 0.3); }
+        .btn-orange:hover { background: linear-gradient(to right, #d85517, #e67035); transform: translateY(-2px); }
+        .btn-blue-outline { background: rgba(51, 102, 204, 0.2); border: 2px solid rgba(255, 255, 255, 0.3); color: var(--white); backdrop-filter: blur(5px); }
+        .btn-blue-outline:hover { background: rgba(51, 102, 204, 0.6); transform: translateY(-2px); }
+        .hero-curve { position: absolute; bottom: 0; left: 0; width: 100%; height: auto; transform: translateY(2px); }
+        .hero-small { padding: 140px 0 80px; }
+
+        /* ================= FASILITAS CARDS ================= */
+        .fasilitas-section { padding: 80px 0; background-color: var(--white); }
+        .cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 25px; align-items: stretch; }
+        .card { background: var(--primary-blue); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; }
+        .card-img-wrapper { height: 180px; overflow: hidden; position: relative; flex-shrink: 0; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .card-img-wrapper img { transform: scale(1.1); }
+        .card-content { padding: 40px 20px 25px; text-align: center; color: var(--white); position: relative; background: linear-gradient(to bottom, #1e3a6d, #12244a); flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-icon { width: 60px; height: 60px; background: var(--primary-blue); border: 4px solid var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; position: absolute; top: -30px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .card-title { font-size: 18px; margin-bottom: 10px; font-weight: 700; }
+        .card-desc { font-size: 13px; color: #cbd5e1; margin-bottom: 15px; line-height: 1.5; font-weight: 500; }
+        .card-fasilitas-list { text-align: left; padding-left: 20px; font-size: 12px; color: #cbd5e1; list-style-type: disc; margin-bottom: 25px; flex-grow: 1;}
+        .card-fasilitas-list li { margin-bottom: 6px; }
+        .card-btn { background-color: var(--white); color: var(--primary-blue); width: 100%; padding: 10px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer; transition: background 0.3s; margin-top: auto; }
+        .card-btn:hover { background-color: #f1f5f9; }
+
+        /* ================= FEATURES ================= */
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding: 60px 0; }
+        .feature-item { background: var(--white); padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .feature-icon-wrapper { position: relative; display: inline-block; margin-bottom: 20px; }
+        .feature-icon-wrapper i.main-icon { font-size: 50px; color: var(--secondary-blue); }
+        .feature-icon-wrapper i.check-icon { position: absolute; bottom: 0; right: -5px; font-size: 20px; background: var(--white); border-radius: 50%; padding: 2px; }
+        .check-icon.orange { color: var(--accent-orange); } .check-icon.green { color: #22c55e; } .check-icon.blue { color: var(--secondary-blue); }
+        .feature-item h4 { font-size: 18px; color: var(--primary-blue); margin-bottom: 10px; }
+        .feature-item p { font-size: 13px; color: var(--text-light); }
+
+        /* ================= SCHEDULE & BOOKING PAGE ================= */
+        .schedule-container { padding: 40px 0; }
+        .filter-wrapper { background: var(--white); border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
+        .filter-tabs { display: flex; border-bottom: 1px solid var(--border-color); overflow-x: auto; scrollbar-width: none; }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab { padding: 15px 25px; border: none; background: transparent; font-weight: 600; color: var(--text-light); cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .filter-tab.active { background-color: var(--primary-blue); color: var(--white); border-radius: 8px 0 0 0; }
+        
+        .sub-filter { padding: 15px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color); display: flex; gap: 10px; flex-wrap: wrap; }
+        .sub-tab { padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border-color); background: var(--white); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
+        .sub-tab.active { background: var(--secondary-blue); color: var(--white); border-color: var(--secondary-blue); }
+
+        .kontrol-minggu { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .btn-nav { padding: 8px 15px; cursor: pointer; border: 1px solid var(--border-color); background: var(--white); border-radius: 6px; font-weight: 600; font-size: 13px; color: var(--primary-blue); transition: 0.2s;}
+        .btn-nav:hover { background: var(--bg-body); }
+        
+        .schedule-content { display: grid; grid-template-columns: 2.5fr 1fr; gap: 30px; align-items: start; }
+        .table-section { width: 100%; overflow: hidden; }
+        .table-wrapper { background: var(--white); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; }
+        .table-responsive { width: 100%; overflow-x: auto; }
+        
+        table { width: 100%; min-width: 800px; border-collapse: collapse; text-align: center; }
+        th, td { border: 1px solid var(--border-color); padding: 8px; vertical-align: middle; }
+        th { background-color: var(--primary-blue); font-weight: 600; font-size: 13px; color: var(--white); padding: 12px 10px;}
+        .time-col { background-color: #fafbfc; font-weight: 600; color: var(--text-dark); font-size: 12px; width: 100px; position: sticky; left: 0; z-index: 2; border-right: 2px solid var(--border-color); }
+        
+        .slot-btn { width: 100%; padding: 8px 4px; border-radius: 4px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; transition: 0.2s; }
+        .tersedia { background-color: #e0f2fe; color: var(--secondary-blue); border: 1px solid #bae6fd; }
+        .tersedia:hover { background-color: #bae6fd; }
+        .terisi { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border: 1px dashed #cbd5e1; }
+        .dipilih { background-color: var(--success-green); color: var(--white); box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4); border: 1px solid #16a34a; }
+        .lewat { background-color: #f8fafc; color: #cbd5e1; cursor: not-allowed; border: 1px solid #e2e8f0; } 
+        .member { background-color: #fef08a; color: #854d0e; cursor: not-allowed; border: 1px solid #fde047; }
+        .event { background-color: #fecdd3; color: #be123c; cursor: not-allowed; border: 1px solid #fda4af; }
+
+        .booking-card { background: var(--white); border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 30px; width: 100%; box-sizing: border-box; position: sticky; top: 90px; }
+        .booking-card h3 { color: var(--primary-blue); font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid var(--bg-body); padding-bottom: 10px; }
+        .cart-items { margin-bottom: 20px; max-height: 200px; overflow-y: auto; font-size: 13px; color: var(--text-light); }
+        .cart-empty { text-align: center; color: var(--text-light); font-size: 13px; padding: 20px 0; font-style: italic; }
+        .cart-total { display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 25px; border-top: 2px solid var(--bg-body); padding-top: 15px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text-light); }
+        .form-group input { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 6px; outline: none; font-family: inherit; background-color: #f8fafc; box-sizing: border-box; }
+        .btn-submit { width: 100%; padding: 15px; margin-top: 10px; font-size: 16px; border-radius: 8px; }
+        .btn-submit:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        /* ================= INVOICE PAGE ================= */
+        .footer-section { background-color: var(--bg-body); padding: 60px 0 20px; }
+        .footer-content { background: var(--white); border-radius: 12px; padding: 40px; display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); gap: 40px;}
+        .about-us { flex: 1; }
+        .contact-info { flex: 1; display: flex; flex-direction: column;}
+        .map-container { width: 100%; height: 200px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); margin-top: auto; }
+        
+        @media (max-width: 1024px) {
+            .cards-grid { grid-template-columns: repeat(2, 1fr); }
+            .schedule-content { grid-template-columns: 1fr; }
+            .booking-card { position: static; margin-top: 30px; }
+        }
+        @media (max-width: 768px) {
+            .nav-links { position: absolute; top: 70px; left: 0; width: 100%; background-color: rgba(35, 67, 138, 0.95); backdrop-filter: blur(5px); flex-direction: column; align-items: center; gap: 0; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; z-index: 99; border-radius: 0 0 15px 15px; }
+            .nav-links.active { max-height: 350px; }
+            .nav-links li { width: 100%; text-align: center; }
+            .nav-links li a:not(.btn-nav-cta) { display: block; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 16px; }
+            .mobile-toggle { display: block; }
+            .cards-grid, .features-grid { grid-template-columns: 1fr; }
+            .footer-content { flex-direction: column; padding: 20px; gap: 20px;}
+            .kontrol-minggu { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav class="container">
+            <div class="logo" onclick="kembaliKeBeranda()">
+                <i class="fa-solid fa-fire-flame-curved logo-icon"></i> <span>SportFacility</span>
+            </div>
+            <ul class="nav-links" id="mobile-menu">
+                <li><a href="javascript:void(0)" onclick="kembaliKeBeranda()">Beranda</a></li>
+                <li><a href="javascript:void(0)" onclick="switchPage('home', 'fasilitas')">Fasilitas</a></li>
+                <li><a href="javascript:void(0)" onclick="switchPage('schedule')">Jadwal</a></li>
+                <li><a href="#tentang" onclick="scrollToSection(event, 'tentang')">Tentang Kami</a></li>
+                <!-- TAMBAHKAN BARIS INI -->
+                <li><a href="javascript:void(0)" onclick="bukaModalCari()" style="color: var(--accent-orange); font-weight: bold;"><i class="fa-solid fa-magnifying-glass"></i> Cek Pesanan</a></li>
+                <!-- ------------------- -->
+                <li><a href="javascript:void(0)" class="btn-nav-cta" onclick="switchPage('schedule')">Pesan Sekarang</a></li>
+            </ul>
+            <div class="mobile-toggle" id="hamburger-btn"><i class="fa-solid fa-bars"></i></div>
+        </nav>
+    </header>
+
+    <!-- HALAMAN HOME -->
+    <div id="page-home">
+        <section class="hero">
+            <div class="container">
+                <h1>Sistem Informasi Fasilitas Olahraga</h1>
+                <p>Mudah • Cepat • Terjadwal</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-orange" onclick="switchPage('schedule')">Pesan Lapangan</button>
+                    <button class="btn btn-blue-outline" onclick="switchPage('schedule')">Lihat Jadwal</button>
+                </div>
+            </div>
+            <svg class="hero-curve" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none"><path fill="#ffffff" d="M0,60 C480,150 960,150 1440,60 L1440,120 L0,120 Z"></path></svg>
+        </section>
+
+        <section class="fasilitas-section" id="fasilitas">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Fasilitas Olahraga yang Tersedia</h2>
+                    <p>Kami menyediakan jadwal dan pesan lapangan dengan mudah. Semua lapangan terintegrasi dalam satu sistem.</p>
+                </div>
+                <div class="cards-grid" id="facility-cards-container">
+                    <!-- Cards dari JS -->
+                </div>
+            </div>
+        </section>
+
+        <section class="container" style="padding-bottom: 60px;">
+            <div class="section-title">
+                <h2>Jadwal & Pemesanan</h2>
+                <p>Cek ketersediaan jadwal mingguan dan pesan lapangan dengan mudah.</p>
+            </div>
+            <div class="features-grid" style="padding: 0;">
+                <div class="feature-item"><div class="feature-icon-wrapper"><i class="fa-regular fa-calendar-days main-icon"></i><i class="fa-solid fa-circle-check check-icon orange"></i></div><h4>Kalender Mingguan</h4></div>
+                <div class="feature-item"><div class="feature-icon-wrapper"><i class="fa-solid fa-file-signature main-icon"></i><i class="fa-solid fa-circle-check check-icon green"></i></div><h4>Pesan Multi-Slot</h4></div>
+                <div class="feature-item"><div class="feature-icon-wrapper"><i class="fa-solid fa-clock main-icon"></i><i class="fa-solid fa-location-dot check-icon blue"></i></div><h4>Mainkan Sekarang</h4></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- HALAMAN JADWAL -->
+    <div id="page-schedule" class="hidden">
+        <section class="hero hero-small">
+            <div class="container">
+                <h1>Jadwal & Pemesanan</h1>
+                <p>Cek ketersediaan jadwal dan pesan lapangan dengan mudah.</p>
+            </div>
+            <svg class="hero-curve" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none"><path fill="#f4f7fb" d="M0,60 C480,150 960,150 1440,60 L1440,120 L0,120 Z"></path></svg>
+        </section>
+
+        <section class="schedule-container container">
+            <div class="filter-wrapper">
+                <div class="filter-tabs" id="schedule-tabs-container">
+                    <!-- Tabs Olahraga -->
+                </div>
+                <div class="sub-filter" id="sub-filter-container">
+                    <!-- Sub Tabs Lapangan 1, Lapangan 2 -->
+                </div>
+                
+                <div class="kontrol-minggu">
+                    <button class="btn-nav" onclick="geserMinggu(-1)"><i class="fa-solid fa-chevron-left"></i> Minggu Sebelumnya</button>
+                    <div style="font-weight: 600; color: var(--primary-blue);" id="label-minggu">Memuat...</div>
+                    <button class="btn-nav" onclick="geserMinggu(1)">Minggu Selanjutnya <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <div class="schedule-content">
+                <div class="table-section">
+                    <div class="table-wrapper">
+                        <div class="table-responsive">
+                            <table id="schedule-table">
+                                <thead id="schedule-thead"></thead>
+                                <tbody id="schedule-tbody">
+                                    <tr><td colspan="8" style="padding: 40px;">Memuat data dari server...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 13px; color: var(--text-light); line-height: 1.5; padding: 10px; background: #e0f2fe; border-radius: 6px; border-left: 4px solid var(--secondary-blue);">
+                        <i class="fa-solid fa-circle-info" style="color: var(--primary-blue); margin-right: 5px;"></i> 
+                        <strong>Aturan Booking:</strong> Anda dapat memilih beberapa jam sekaligus, namun <strong>harus pada tanggal yang sama</strong> dalam satu kali proses checkout.
+                    </p>
+                </div>
+
+                <div>
+                    <div class="booking-card">
+                        <h3>Ringkasan Pesanan</h3>
+                        <div id="cart-items-container" class="cart-items">
+                            <div class="cart-empty">Belum ada jadwal yang dipilih.</div>
+                        </div>
+
+                        <div class="cart-total">
+                            <span>Total Bayar</span>
+                            <span id="cart-total-price">Rp 0</span>
+                        </div>
+                        
+                        <form id="booking-form" onsubmit="submitBooking(event)">
+                            <div class="form-group">
+                                <label>Nama Lengkap</label>
+                                <input type="text" id="cust-name" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nomor WhatsApp</label>
+                                <input type="tel" id="cust-wa" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Aktif</label>
+                                <input type="email" id="cust-email" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-orange btn-submit" id="btn-process" disabled>Proses Pemesanan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- HALAMAN INVOICE -->
+    <div id="page-invoice" class="hidden">
+        <section class="container" style="padding: 100px 0 60px; min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+            <div class="booking-card" style="max-width: 600px; width: 100%;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: var(--primary-blue); margin-bottom: 10px;">Detail Pemesanan</h2>
+                    <span id="inv-status-badge" style="padding: 8px 16px; border-radius: 50px; font-weight: 600; font-size: 14px; color: white;">Belum Bayar</span>
+                </div>
+                
+                <div style="background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px;">
+                        <span style="color: var(--text-light);">ID Pesanan:</span>
+                        <strong id="inv-id" style="color: var(--primary-blue);"></strong>
+                    </div>
+                    <hr style="border: none; border-top: 1px dashed #cbd5e1; margin: 15px 0;">
+                    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: 700;">
+                        <span>Total Tagihan:</span>
+                        <span id="inv-total" style="color: var(--text-dark);"></span>
+                    </div>
+                </div>
+
+                <!-- Bagian Konfirmasi Pembayaran dan Form Upload Gambar -->
+                <div id="payment-section">
+                    <h3 style="font-size: 16px; color: var(--primary-blue); margin-bottom: 10px;">Transfer ke Rekening:</h3>
+                    <div style="padding: 15px; border: 2px solid var(--secondary-blue); border-radius: 8px; background: #eff6ff; margin-bottom: 20px;">
+                        <div style="font-weight: 700; font-size: 18px; color: var(--primary-blue);">BCA - 1234 567 890</div>
+                        <div style="font-size: 14px; color: var(--text-light);">a.n. Pengelola Sport Facility</div>
+                    </div>
+                    
+                    <div style="border-top: 2px solid var(--bg-body); padding-top: 20px;">
+                        <h3 style="font-size: 16px; color: var(--primary-blue); margin-bottom: 10px;">Konfirmasi Pembayaran</h3>
+                        <p style="font-size: 13px; color: var(--text-light); margin-bottom: 15px;">Silakan upload bukti transfer Anda di bawah ini agar admin dapat memproses pesanan[cite: 1].</p>
+                        
+                        <form id="form-bukti" onsubmit="submitBukti(event)">
+                            <input type="file" id="file-bukti" accept="image/*" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 15px;">
+                            <button type="submit" class="btn btn-orange" style="width: 100%;">Kirim Bukti Bayar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="waiting-section" class="hidden" style="text-align: center; padding: 20px; background: #e0f2fe; border-radius: 8px; margin-top: 20px; color: var(--secondary-blue);">
+                    <i class="fa-solid fa-hourglass-half" style="font-size: 30px; margin-bottom: 10px;"></i>
+                    <p style="font-weight: 600; font-size: 14px;">Menunggu konfirmasi Admin.</p>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <button class="btn btn-blue-outline" style="width: 100%; color: var(--primary-blue); border-color: var(--primary-blue);" onclick="kembaliKeBeranda()">Kembali ke Beranda</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- MODAL CEK PESANAN -->
+    <div id="modal-cari" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:25px; border-radius:12px; width:90%; max-width:400px; position:relative;">
+            <i class="fa-solid fa-xmark" style="position:absolute; top:15px; right:15px; font-size:20px; cursor:pointer; color:#666;" onclick="tutupModalCari()"></i>
+            <h3 style="color:var(--primary-blue); margin-top:0;">Cari Pesanan Saya</h3>
+            <p style="font-size:13px; color:#666; margin-bottom:15px;">Masukkan ID Pesanan Anda (contoh: ORD-123456) untuk melihat status atau tagihan.</p>
+            <div class="form-group">
+                <input type="text" id="input-cari-id" placeholder="ORD-XXXXXX" style="text-transform: uppercase;">
+            </div>
+            <button class="btn btn-orange" style="width:100%;" onclick="cariPesanan()">Cek Sekarang</button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="footer-content" id="tentang">
+                <div class="about-us">
+                    <h3 style="color: var(--primary-blue); font-size: 22px; margin-bottom: 15px;">Tentang Kami</h3>
+                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">Platform berbasis website untuk memudahkan akses informasi, jadwal, serta pemesanan fasilitas olahraga secara online. Nikmati kemudahan memesan lapangan olahraga favorit Anda kapan saja dan di mana saja.</p>
+                </div>
+                <div class="contact-info">
+                    <h3 style="color: var(--primary-blue); font-size: 22px; margin-bottom: 15px;">Lokasi Lapangan</h3>
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009696231!2d106.75947704514574!3d-6.229746499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0!2sJakarta!5e0!3m2!1sen!2sid!4v1699999999999!5m2!1sen!2sid" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-light); font-size: 13px; border-top: 1px solid #d1d5db; padding-top: 20px;">&copy; 2026 Sistem Informasi Fasilitas Olahraga • All Rights Reserved.</div>
+        </div>
+    </footer>
+
+    <script>
+        // ================= STRUKTUR DATA =================
+        const configLapangan = [
+            { 
+                id: "Tenis", jenis: "Tenis", harga: 450000, img: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&q=80", icon: "fa-table-tennis-paddle-ball",
+                fasilitas: ["Net Standar", "Kursi Wasit", "Lampu LED", "Blok 3 Jam Khusus"],
+                fisik: [{id: "TNS-01", nama: "Tenis 1"}, {id: "TNS-02", nama: "Tenis 2"}] 
+            },
+            { 
+                id: "Futsal", jenis: "Futsal", harga: 100000, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80", icon: "fa-futbol",
+                fasilitas: ["Gawang Standar", "Lantai Interlocking", "Papan Skor", "Lapangan Multiguna"],
+                fisik: [{id: "FUT-01", nama: "Futsal Utama"}] 
+            },
+            { 
+                id: "Basket", jenis: "Basket", harga: 100000, img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80", icon: "fa-basketball",
+                fasilitas: ["Ring Hidrolik", "Lantai Vinyl", "Papan Skor", "Lapangan Multiguna"],
+                fisik: [{id: "BSK-01", nama: "Basket Utama"}] 
+            },
+            { 
+                id: "Voli", jenis: "Voli", harga: 100000, img: "https://images.unsplash.com/photo-1592656094267-764a45160876?w=600&q=80", icon: "fa-volleyball",
+                fasilitas: ["Net Standar", "Tiang Portabel", "Papan Skor", "Lapangan Multiguna"],
+                fisik: [{id: "VOL-01", nama: "Voli Utama"}] 
+            }
+        ];
+
+        // ================= STATE APLIKASI =================
+        let currentOlahraga = configLapangan[0];
+        let currentFisik = currentOlahraga.fisik[0];
+        let startOfWeek = getMonday(new Date());
+        let arrayTanggalMinggu = [];
+        let keranjang = []; 
+        let currentViewOrderId = null;
+
+        // ================= HELPER FUNGSI =================
+        function getMonday(d) {
+            d = new Date(d);
+            let day = d.getDay(), diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        function generateTanggalMinggu(start) {
+            let arr = []; let curr = new Date(start);
+            for(let i=0; i<7; i++) {
+                arr.push(new Date(curr).toISOString().split('T')[0]);
+                curr.setDate(curr.getDate() + 1);
+            }
+            return arr;
+        }
+
+        function formatTanggalPendek(tglStr) {
+            const date = new Date(tglStr);
+            const namaHari = ["Ming", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+            return `${namaHari[date.getDay()]}<br>${date.getDate()}/${date.getMonth()+1}`;
+        }
+
+        // ================= RENDER HALAMAN HOME =================
+        function renderCards() {
+            const container = document.getElementById('facility-cards-container');
+            container.innerHTML = configLapangan.map(kat => `
+                <div class="card">
+                    <div class="card-img-wrapper"><img src="${kat.img}" alt="${kat.jenis}"></div>
+                    <div class="card-icon"><i class="fa-solid ${kat.icon}"></i></div>
+                    <div class="card-content">
+                        <div>
+                            <h3 class="card-title">Lapangan ${kat.jenis}</h3>
+                            <p class="card-desc">Mulai Rp ${kat.harga.toLocaleString('id-ID')}/${kat.id==="Tenis"?"3 jam":"jam"}</p>
+                            <ul class="card-fasilitas-list">
+                                ${kat.fasilitas.map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <button class="card-btn" onclick="selectKategoriAndSwitch('${kat.id}')">Lihat Jadwal</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ================= RENDER HALAMAN JADWAL =================
+        function renderTabs() {
+            const tabOlahraga = document.getElementById('schedule-tabs-container');
+            tabOlahraga.innerHTML = configLapangan.map(ol => 
+                `<button class="filter-tab ${ol.id === currentOlahraga.id ? 'active' : ''}" onclick="gantiOlahraga('${ol.id}')">${ol.jenis}</button>`
+            ).join('');
+
+            const tabFisik = document.getElementById('sub-filter-container');
+            if (currentOlahraga.fisik.length > 1) {
+                tabFisik.style.display = 'flex';
+                tabFisik.innerHTML = currentOlahraga.fisik.map(f => 
+                    `<button class="sub-tab ${f.id === currentFisik.id ? 'active' : ''}" onclick="gantiFisik('${f.id}')">${f.nama}</button>`
+                ).join('');
+            } else {
+                tabFisik.style.display = 'none';
+            }
+        }
+
+        function gantiOlahraga(id_olahraga) {
+            currentOlahraga = configLapangan.find(o => o.id === id_olahraga);
+            currentFisik = currentOlahraga.fisik[0];
+            keranjang = []; updateKeranjang();
+            renderTabs(); renderKalender();
+        }
+
+        function gantiFisik(id_fisik) {
+            currentFisik = currentOlahraga.fisik.find(f => f.id === id_fisik);
+            keranjang = []; updateKeranjang();
+            renderTabs(); renderKalender();
+        }
+
+        function geserMinggu(offset) {
+            startOfWeek.setDate(startOfWeek.getDate() + (offset * 7));
+            keranjang = []; updateKeranjang();
+            renderKalender();
+        }
+
+        function selectKategoriAndSwitch(id_olahraga) {
+            gantiOlahraga(id_olahraga);
+            switchPage('schedule');
+        }
+
+        // ================= TABEL KALENDER MINGGUAN =================
+        async function renderKalender() {
+            arrayTanggalMinggu = generateTanggalMinggu(startOfWeek);
+            document.getElementById('label-minggu').innerText = `${arrayTanggalMinggu[0]} s/d ${arrayTanggalMinggu[6]}`;
+
+            let headHtml = `<tr><th class="time-col">Jam</th>`;
+            arrayTanggalMinggu.forEach(tgl => headHtml += `<th>${formatTanggalPendek(tgl)}</th>`);
+            headHtml += `</tr>`;
+            document.getElementById('schedule-thead').innerHTML = headHtml;
+
+            document.getElementById('schedule-tbody').innerHTML = `<tr><td colspan="8" style="padding:40px;">Mengambil data dari server...</td></tr>`;
+            
+            const jadwalServer = await BackendAPI.getKetersediaanMingguan(currentFisik.id, currentOlahraga.id, arrayTanggalMinggu);
+
+            let bodyHtml = '';
+            jadwalServer.forEach(baris => {
+                bodyHtml += `<tr><td class="time-col">${baris.jam}</td>`;
+                
+                arrayTanggalMinggu.forEach(tgl => {
+                    const status = baris.hari[tgl];
+                    const isDipilih = keranjang.some(k => k.tanggal === tgl && k.jam === baris.jam);
+                    const isPast = new Date(tgl) < new Date(new Date().toISOString().split('T')[0]);
+
+                    if (isDipilih) {
+                        bodyHtml += `<td><button class="slot-btn dipilih" onclick="toggleSlot('${tgl}', '${baris.jam}')"><i class="fa-solid fa-check"></i> Batal</button></td>`;
+                    } else if (isPast) {
+                        bodyHtml += `<td><button class="slot-btn lewat" disabled>Lewat</button></td>`;
+                    } else if (status === "Tersedia") {
+                        bodyHtml += `<td><button class="slot-btn tersedia" onclick="toggleSlot('${tgl}', '${baris.jam}')">Pilih</button></td>`;
+                    } else if (status === "Member Tetap") {
+                        bodyHtml += `<td><button class="slot-btn member" disabled><i class="fa-solid fa-crown"></i> Member</button></td>`;
+                    } else if (status === "Special Event") {
+                        bodyHtml += `<td><button class="slot-btn event" disabled><i class="fa-solid fa-star"></i> Event</button></td>`;
+                    } else {
+                        bodyHtml += `<td><button class="slot-btn terisi" disabled><i class="fa-solid fa-lock"></i> Penuh</button></td>`;
+                    }
+                });
+                bodyHtml += `</tr>`;
+            });
+            document.getElementById('schedule-tbody').innerHTML = bodyHtml;
+        }
+
+        // ================= KERANJANG BOOKING =================
+        function toggleSlot(tanggal, jam) {
+            if (keranjang.length > 0 && keranjang[0].tanggal !== tanggal) {
+                alert("Anda hanya dapat memesan jadwal pada TANGGAL YANG SAMA dalam 1 kali proses. Selesaikan atau batalkan pesanan sebelumnya.");
+                return;
+            }
+
+            const index = keranjang.findIndex(k => k.tanggal === tanggal && k.jam === jam);
+            if (index > -1) keranjang.splice(index, 1);
+            else keranjang.push({ tanggal, jam, harga: currentOlahraga.harga });
+
+            updateKeranjang();
+            renderKalender(); 
+        }
+
+        function updateKeranjang() {
+            const container = document.getElementById('cart-items-container');
+            const totalEl = document.getElementById('cart-total-price');
+            const btn = document.getElementById('btn-process');
+
+            if (keranjang.length === 0) {
+                container.innerHTML = '<div class="cart-empty">Belum ada jadwal yang dipilih. Klik pada tabel jadwal.</div>';
+                totalEl.innerText = "Rp 0";
+                btn.disabled = true;
+                return;
+            }
+
+            let html = `
+                <div style="margin-bottom:10px;"><strong>${currentFisik.nama}</strong></div>
+                <div style="margin-bottom:5px;">Tanggal: <span style="color:var(--primary-blue); font-weight:600;">${keranjang[0].tanggal}</span></div>
+            `;
+            
+            let sortedJam = keranjang.map(k => k.jam).sort();
+            sortedJam.forEach(j => {
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:5px; padding:5px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:4px;">
+                            <span>Jam: ${j}</span>
+                            <strong>Rp ${currentOlahraga.harga.toLocaleString('id-ID')}</strong>
+                         </div>`;
+            });
+
+            let totalHarga = keranjang.reduce((sum, item) => sum + item.harga, 0);
+            container.innerHTML = html;
+            totalEl.innerText = `Rp ${totalHarga.toLocaleString('id-ID')}`;
+            btn.disabled = false;
+        }
+
+        async function submitBooking(e) {
+            e.preventDefault();
+            if(keranjang.length === 0) return;
+
+            const payload = {
+                nama_pelanggan: document.getElementById('cust-name').value,
+                no_whatsapp: document.getElementById('cust-wa').value,
+                email_pelanggan: document.getElementById('cust-email').value,
+                id_lapangan: currentFisik.id,
+                tanggal_main: keranjang[0].tanggal,
+                waktu_main: keranjang.map(k => k.jam),
+                total_bayar: keranjang.reduce((sum, item) => sum + item.harga, 0)
+            };
+
+            document.getElementById('btn-process').innerText = "Memproses...";
+
+            try {
+                const res = await BackendAPI.buatPesananReguler(payload);
+                document.getElementById('booking-form').reset();
+                keranjang = [];
+                document.getElementById('btn-process').innerText = "Proses Pemesanan";
+
+                // --- TAMBAHKAN 2 BARIS INI ---
+                updateKeranjang(); 
+                renderKalender();  
+                // -----------------------------
+
+                openInvoice(res.id_pemesanan);
+            } catch (error) {
+                alert(error);
+                document.getElementById('btn-process').innerText = "Proses Pemesanan";
+
+                // --- TAMBAHKAN 3 BARIS INI ---
+                // Reset pilihan karena sudah tidak valid, lalu tarik data terbaru dari server
+                keranjang = [];
+                updateKeranjang();
+                renderKalender(); 
+                // -----------------------------
+            }
+        }
+
+        // ================= INVOICE & NAVIGASI =================
+        async function openInvoice(orderId) {
+            const semuaPesanan = await BackendAPI.getAllPesanan();
+            const pesanan = semuaPesanan.find(p => p.id_pemesanan === orderId);
+            
+            if(!pesanan) {
+                alert("Pesanan tidak ditemukan!"); return;
+            }
+
+            currentViewOrderId = orderId;
+            document.getElementById('inv-id').innerText = pesanan.id_pemesanan;
+            document.getElementById('inv-total').innerText = `Rp ${pesanan.total_bayar.toLocaleString('id-ID')}`;
+            
+            const badge = document.getElementById('inv-status-badge');
+            const paySec = document.getElementById('payment-section');
+            const waitSec = document.getElementById('waiting-section');
+
+            if(pesanan.status_pesanan === "Belum Bayar") {
+                badge.style.backgroundColor = "#eab308"; badge.innerText = "Belum Bayar";
+                paySec.classList.remove('hidden'); waitSec.classList.add('hidden');
+            } else {
+                badge.style.backgroundColor = "#22c55e"; badge.innerText = pesanan.status_pesanan;
+                paySec.classList.add('hidden'); waitSec.classList.remove('hidden');
+            }
+
+            switchPage('invoice');
+        }
+
+        // FUNGSI UNTUK MENGIRIM BUKTI (DIKEMBALIKAN)
+        async function submitBukti(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('file-bukti');
+            if(fileInput.files.length === 0) {
+                alert("Silakan pilih file bukti transfer terlebih dahulu.");
+                return;
+            }
+            
+            await BackendAPI.updateStatus(currentViewOrderId, "Lunas, menunggu konfirmasi Admin");
+            openInvoice(currentViewOrderId); // Refresh
+        }
+
+        function switchPage(pageId, targetSectionId = null) {
+            document.getElementById('page-home').classList.toggle('hidden', pageId !== 'home');
+            document.getElementById('page-schedule').classList.toggle('hidden', pageId !== 'schedule');
+            document.getElementById('page-invoice').classList.toggle('hidden', pageId !== 'invoice');
+            
+            // --- TAMBAHKAN BLOK INI ---
+            if (pageId === 'schedule') {
+                renderKalender(); // Paksa refresh jadwal dari server
+            }
+            // --------------------------
+
+            if (targetSectionId) {
+                setTimeout(() => document.getElementById(targetSectionId)?.scrollIntoView({ behavior: 'smooth' }), 500);
+            } else {
+// --- BAGIAN INI YANG DIUBAH ---
+        // Gunakan setTimeout agar DOM selesai dirender sebelum melakukan scroll
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 500); 
+        // ------------------------------
+            }
+        }
+
+        function kembaliKeBeranda() { switchPage('home'); }
+        function scrollToSection(e, sectionId) { e.preventDefault(); document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' }); }
+
+        //document.getElementById('hamburger-btn').addEventListener('click', () => {
+        //    document.getElementById('mobile-menu').classList.toggle('active');
+        //});
+
+	// ================= KONTROL MENU MOBILE =================
+const mobileMenu = document.getElementById('mobile-menu');
+const hamburgerBtn = document.getElementById('hamburger-btn');
+
+// 1. Buka/Tutup menu saat tombol hamburger diklik
+hamburgerBtn.addEventListener('click', () => {
+    mobileMenu.classList.toggle('active');
+});
+
+// 2. Tutup menu otomatis setelah user mengeklik salah satu menu
+document.querySelectorAll('#mobile-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        mobileMenu.classList.remove('active');
+    });
+});
+
+// 3. Tutup menu otomatis jika user mengeklik di luar area menu
+document.addEventListener('click', (event) => {
+    // Pastikan menu sedang terbuka
+    if (mobileMenu.classList.contains('active')) {
+        // Jika yang diklik BUKAN menu itu sendiri DAN BUKAN tombol hamburger
+        if (!mobileMenu.contains(event.target) && !hamburgerBtn.contains(event.target)) {
+            mobileMenu.classList.remove('active');
+        }
+    }
+});
+
+        // ================= FITUR CEK PESANAN =================
+        function bukaModalCari() {
+            document.getElementById('modal-cari').style.display = 'flex';
+        }
+
+        function tutupModalCari() {
+            document.getElementById('modal-cari').style.display = 'none';
+        }
+
+        async function cariPesanan() {
+            let idCari = document.getElementById('input-cari-id').value.trim().toUpperCase();
+            if(!idCari) { alert("Masukkan ID Pesanan!"); return; }
+
+            // Cari ID tersebut dari Backend
+            const semuaPesanan = await BackendAPI.getAllPesanan();
+            const pesananDitemukan = semuaPesanan.find(p => p.id_pemesanan === idCari);
+
+            if(pesananDitemukan) {
+                tutupModalCari();
+                document.getElementById('input-cari-id').value = ''; // Reset input
+                openInvoice(idCari); // Panggil fungsi openInvoice yang sudah ada
+            } else {
+                alert("Pesanan tidak ditemukan! Pastikan ID yang dimasukkan sudah benar.");
+            }
+        }
+
+        // ================= INISIALISASI =================
+        window.onload = () => {
+            renderCards();
+            renderTabs();
+            renderKalender();
+        };
+    </script>
+</body>
+</html>
