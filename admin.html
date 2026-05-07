@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Management System</title>
+    <title>Admin Dashboard - Manajemen Fasilitas Olahraga Universitas Singaperbangsa Karawang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- MENGHUBUNGKAN KE BACKEND MOCK -->
@@ -85,6 +85,37 @@
         
         .hidden { display: none !important; }
 
+
+        .logo {
+            max-width: 100%;
+        }
+        .title-page {
+            width: 100%;
+            text-align: center;
+            border-left: 5px solid var(--primary);
+            border-right: 5px solid var(--primary);
+        }
+        .title-page h2{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            overflow: hidden;
+            padding: 10px 20px;
+        }
+
+        .title-page h2 span{
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .simbol {
+            border-radius: 12px;
+            border:  3px solid var(--primary);
+            padding: 5px;
+        }
+
         /* ===== PENGATURAN KHUSUS MOBILE (TARGET 360x720) ===== */
         @media (max-width: 768px) {
             .sidebar { 
@@ -104,21 +135,37 @@
             /* Pada layar 360px kotak stats dibuat berjejer ke bawah agar rapi */
             .stats-grid { grid-template-columns: 1fr; gap: 15px; }
             .card { padding: 15px; }
+            .logo {
+                max-width: 90%;
+            }
+            .title-page {
+                padding: 5px 10px;
+            }
+            .title-page h2 span {
+                font-size: 0.7em;
+                white-space: normal;
+            }
+            .simbol {
+                display: none;
+            }
         }
+
     </style>
 </head>
 <body>
 
     <!-- Mobile Header -->
     <div class="mobile-header">
-        <h3 style="margin:0;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h3>
+        <img class="logo" src="assets/logo_unsika.png" alt="logo-perusahaan" />
+        <h3 style="margin:0; display: none;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h3>
         <i class="fa-solid fa-bars" style="font-size: 20px; cursor: pointer;" onclick="toggleSidebar()"></i>
     </div>
 
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2 style="margin:0; border:none; padding:0;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h2>
+            <img class="logo" src="assets/logo_unsika.png" alt="logo-perusahaan" />
+            <h2 style="display:none;margin:0; border:none; padding:0;"><i class="fa-solid fa-fire-flame-curved"></i> SportAdmin</h2>
             <i class="fa-solid fa-xmark" style="font-size: 20px; cursor: pointer; display: none;" onclick="toggleSidebar()" id="close-sidebar"></i>
         </div>
         <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
@@ -139,6 +186,10 @@
     <div class="main-content">
         <!-- SEKSI: DASHBOARD TRANSAKSI -->
         <section id="sec-dashboard">
+            <div class="title-page card">
+                <h2><img class="simbol" src="assets/simbol.png" alt="simbol-perusahaan" /> <span>Manajemen Fasilitas Olahraga Universitas Singaperbangsa Karawang</span></h2>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-box"><h4>Total Booking</h4><p id="stat-total" style="font-size: 24px; font-weight: bold; color: var(--primary); margin:0;">0</p></div>
                 <div class="stat-box"><h4>Menunggu Konfirmasi</h4><p id="stat-pending" style="font-size: 24px; font-weight: bold; color: var(--warning); margin:0;">0</p></div>
@@ -276,10 +327,10 @@
         }
 
 	// --- MENUTUP SIDEBAR SAAT KLIK DI LUAR MENU (MOBILE) ---
-document.addEventListener('click', function(event) {
-    const sidebar = document.getElementById('sidebar');
-    const hamburgerBtn = document.querySelector('.mobile-header .fa-bars');
-    
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('sidebar');
+        const hamburgerBtn = document.querySelector('.mobile-header .fa-bars');
+
     // Pastikan ini hanya berjalan di mode mobile (lebar layar <= 768px) dan sidebar sedang terbuka
     if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
         // Jika elemen yang diklik BUKAN bagian dari sidebar DAN BUKAN tombol hamburger
@@ -289,14 +340,14 @@ document.addEventListener('click', function(event) {
     }
 });	
 
-        function showSection(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('sec-' + id).classList.remove('hidden');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            
-            if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('active'); }
-            if (id === 'dashboard') muatData();
+    function showSection(id) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('sec-' + id).classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
+        if (window.innerWidth <= 768) { document.getElementById('sidebar').classList.remove('active'); }
+        if (id === 'dashboard') muatData();
             if (id === 'event') generateCheckboxJam(); // Render jam sesuai lapangan yg terpilih
         }
 
@@ -328,24 +379,24 @@ document.addEventListener('click', function(event) {
                 const isSelesai = (p.status_pesanan === "Batal Booking" || p.status_pesanan === "Booking Sukses");
 
                 tr.innerHTML = `
-                    <td><strong>${p.id_pemesanan}</strong><br><small style="color:#666;">${p.tipe_booking}</small></td>
-                    <td>
-                        <div style="font-weight: 600;">${p.nama_pelanggan}</div>
-                        <div style="font-size: 12px; color: #666;"><i class="fa-brands fa-whatsapp"></i> ${p.no_whatsapp||'-'}</div>
-                    </td>
-                    <td>
-                        <div style="color: var(--primary); font-weight: 600;">${p.id_lapangan}</div>
-                        <div style="font-size: 12px; color: #666;"><i class="fa-regular fa-calendar"></i> ${p.tanggal_main}</div>
-                    </td>
-                    <td style="font-weight: 600;">Rp ${p.total_bayar.toLocaleString('id-ID')}</td>
-                    <td><span class="badge ${badgeClass}">${p.status_pesanan}</span></td>
-                    <td>
-                        <div class="action-group">
-                            <button class="btn-action btn-view" onclick="bukaModal('${p.id_pemesanan}')"><i class="fa-solid fa-eye"></i> Lihat</button>
-                            <button class="btn-action btn-acc" onclick="ubahStatus('${p.id_pemesanan}', 'Booking Sukses')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-check"></i> Terima</button>
-                            <button class="btn-action btn-rej" onclick="ubahStatus('${p.id_pemesanan}', 'Batal Booking')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-xmark"></i> Tolak</button>
-                        </div>
-                    </td>
+                <td><strong>${p.id_pemesanan}</strong><br><small style="color:#666;">${p.tipe_booking}</small></td>
+                <td>
+                <div style="font-weight: 600;">${p.nama_pelanggan}</div>
+                <div style="font-size: 12px; color: #666;"><i class="fa-brands fa-whatsapp"></i> ${p.no_whatsapp||'-'}</div>
+                </td>
+                <td>
+                <div style="color: var(--primary); font-weight: 600;">${p.id_lapangan}</div>
+                <div style="font-size: 12px; color: #666;"><i class="fa-regular fa-calendar"></i> ${p.tanggal_main}</div>
+                </td>
+                <td style="font-weight: 600;">Rp ${p.total_bayar.toLocaleString('id-ID')}</td>
+                <td><span class="badge ${badgeClass}">${p.status_pesanan}</span></td>
+                <td>
+                <div class="action-group">
+                <button class="btn-action btn-view" onclick="bukaModal('${p.id_pemesanan}')"><i class="fa-solid fa-eye"></i> Lihat</button>
+                <button class="btn-action btn-acc" onclick="ubahStatus('${p.id_pemesanan}', 'Booking Sukses')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-check"></i> Terima</button>
+                <button class="btn-action btn-rej" onclick="ubahStatus('${p.id_pemesanan}', 'Batal Booking')" ${isSelesai ? 'disabled' : ''}><i class="fa-solid fa-xmark"></i> Tolak</button>
+                </div>
+                </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -371,25 +422,25 @@ document.addEventListener('click', function(event) {
             if(!p) return;
 
             const content = `
-                <div style="margin-bottom:15px;">
-                    <div style="color:#666; font-size:12px;">ID Pesanan & Tipe</div>
-                    <div style="font-weight:bold;">${p.id_pemesanan} (${p.tipe_booking})</div>
-                </div>
-                <div style="margin-bottom:15px; padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #eee;">
-                    <div style="font-weight:bold; margin-bottom:5px; color:var(--primary);">Data Pemesan</div>
-                    <div>👤 Nama: ${p.nama_pelanggan}</div>
-                    <div>📞 WhatsApp: ${p.no_whatsapp || '-'}</div>
-                    <div>✉️ Email: ${p.email_pelanggan || '-'}</div>
-                </div>
-                <div style="margin-bottom:15px;">
-                    <div style="color:#666; font-size:12px;">Detail Lapangan</div>
-                    <div>Lapangan: <strong>${p.id_lapangan}</strong></div>
-                    <div>Tanggal: <strong>${p.tanggal_main}</strong></div>
-                    <div>Jam: <strong>${p.waktu_main.join(', ')}</strong></div>
-                </div>
-                <div style="border-top:1px solid #ddd; padding-top:10px; margin-top:15px; font-weight:bold; font-size:16px;">
-                    Total Bayar: Rp ${p.total_bayar.toLocaleString('id-ID')}
-                </div>
+            <div style="margin-bottom:15px;">
+            <div style="color:#666; font-size:12px;">ID Pesanan & Tipe</div>
+            <div style="font-weight:bold;">${p.id_pemesanan} (${p.tipe_booking})</div>
+            </div>
+            <div style="margin-bottom:15px; padding:10px; background:#f8fafc; border-radius:6px; border:1px solid #eee;">
+            <div style="font-weight:bold; margin-bottom:5px; color:var(--primary);">Data Pemesan</div>
+            <div>👤 Nama: ${p.nama_pelanggan}</div>
+            <div>📞 WhatsApp: ${p.no_whatsapp || '-'}</div>
+            <div>✉️ Email: ${p.email_pelanggan || '-'}</div>
+            </div>
+            <div style="margin-bottom:15px;">
+            <div style="color:#666; font-size:12px;">Detail Lapangan</div>
+            <div>Lapangan: <strong>${p.id_lapangan}</strong></div>
+            <div>Tanggal: <strong>${p.tanggal_main}</strong></div>
+            <div>Jam: <strong>${p.waktu_main.join(', ')}</strong></div>
+            </div>
+            <div style="border-top:1px solid #ddd; padding-top:10px; margin-top:15px; font-weight:bold; font-size:16px;">
+            Total Bayar: Rp ${p.total_bayar.toLocaleString('id-ID')}
+            </div>
             `;
             
             document.getElementById('modal-content').innerHTML = content;
@@ -449,14 +500,14 @@ document.addEventListener('click', function(event) {
             // Tentukan pilihan jam berdasarkan jenis lapangan
             const isTenis = idLap.startsWith('TNS');
             const arrayJam = isTenis 
-                ? ["06.00 - 09.00", "09.00 - 12.00", "12.00 - 15.00", "15.00 - 18.00", "18.00 - 21.00"] 
-                : ["09.00 - 10.00", "10.00 - 11.00", "11.00 - 12.00", "12.00 - 13.00", "13.00 - 14.00", "14.00 - 15.00", "15.00 - 16.00", "16.00 - 17.00", "17.00 - 18.00", "18.00 - 19.00", "19.00 - 20.00", "20.00 - 21.00"];
+            ? ["06.00 - 09.00", "09.00 - 12.00", "12.00 - 15.00", "15.00 - 18.00", "18.00 - 21.00"] 
+            : ["09.00 - 10.00", "10.00 - 11.00", "11.00 - 12.00", "12.00 - 13.00", "13.00 - 14.00", "14.00 - 15.00", "15.00 - 16.00", "16.00 - 17.00", "17.00 - 18.00", "18.00 - 19.00", "19.00 - 20.00", "20.00 - 21.00"];
 
             let html = '';
             arrayJam.forEach(jam => {
                 html += `<label class="checkbox-item">
-                            <input type="checkbox" value="${jam}" class="chk-jam"> ${jam}
-                         </label>`;
+                <input type="checkbox" value="${jam}" class="chk-jam"> ${jam}
+                </label>`;
             });
             container.innerHTML = html;
         }
