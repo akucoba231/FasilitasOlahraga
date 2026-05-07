@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistem Informasi Fasilitas Olahraga</title>
+    <title>Manajemen Fasilitas Olahraga Universitas Singaperbangsa Karawang</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
     
@@ -60,7 +60,7 @@
         /* ================= HERO SECTION ================= */
         .hero {
             position: relative;
-            background: linear-gradient(rgba(35, 67, 138, 0.7), rgba(35, 67, 138, 0.6)), url('https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(35, 67, 138, 0.7), rgba(35, 67, 138, 0.6)), url('assets/bg.png') center/cover no-repeat;
             padding: 180px 0 150px; text-align: center; color: var(--white);
         }
         .hero h1 { font-size: clamp(28px, 5vw, 42px); font-weight: 700; margin-bottom: 15px; }
@@ -82,7 +82,7 @@
         .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
         .card:hover .card-img-wrapper img { transform: scale(1.1); }
         .card-content { padding: 40px 20px 25px; text-align: center; color: var(--white); position: relative; background: linear-gradient(to bottom, #1e3a6d, #12244a); flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .card-icon { width: 60px; height: 60px; background: var(--primary-blue); border: 4px solid var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; position: absolute; top: -30px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .card-icon { width: 60px; height: 60px; background: var(--white); border: 4px solid var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; position: absolute; top: 0; left: 0; transform: translateX(0%); z-index: 10; }
         .card-title { font-size: 18px; margin-bottom: 10px; font-weight: 700; }
         .card-desc { font-size: 13px; color: #cbd5e1; margin-bottom: 15px; line-height: 1.5; font-weight: 500; }
         .card-fasilitas-list { text-align: left; padding-left: 20px; font-size: 12px; color: #cbd5e1; list-style-type: disc; margin-bottom: 25px; flex-grow: 1;}
@@ -108,7 +108,7 @@
         .filter-tab { padding: 15px 25px; border: none; background: transparent; font-weight: 600; color: var(--text-light); cursor: pointer; white-space: nowrap; transition: 0.3s; }
         .filter-tab.active { background-color: var(--primary-blue); color: var(--white); border-radius: 8px 0 0 0; }
         
-        .sub-filter { padding: 15px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color); display: flex; gap: 10px; flex-wrap: wrap; }
+        .sub-filter { padding: 15px 20px; background: #fafbfc; border-bottom: 1px solid var(--border-color); display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-start; align-items: center; }
         .sub-tab { padding: 8px 16px; border-radius: 50px; border: 1px solid var(--border-color); background: var(--white); cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
         .sub-tab.active { background: var(--secondary-blue); color: var(--white); border-color: var(--secondary-blue); }
 
@@ -168,6 +168,13 @@
             .cards-grid, .features-grid { grid-template-columns: 1fr; }
             .footer-content { flex-direction: column; padding: 20px; gap: 20px;}
             .kontrol-minggu { flex-direction: column; gap: 10px; }
+            .title-page {
+                font-size: 0.7em;
+                padding: 5px 10px;
+            }
+        }
+        .logo-baru {
+            width: 90%;
         }
     </style>
 </head>
@@ -176,7 +183,8 @@
     <header>
         <nav class="container">
             <div class="logo" onclick="kembaliKeBeranda()">
-                <i class="fa-solid fa-fire-flame-curved logo-icon"></i> <span>SportFacility</span>
+                <img class="logo-baru" src="assets/logo_unsika.png" alt="logo-perusahaan" />
+                <!-- <i class="fa-solid fa-fire-flame-curved logo-icon"></i> <span>SportFacility</span> -->
             </div>
             <ul class="nav-links" id="mobile-menu">
                 <li><a href="javascript:void(0)" onclick="kembaliKeBeranda()">Beranda</a></li>
@@ -196,7 +204,7 @@
     <div id="page-home">
         <section class="hero">
             <div class="container">
-                <h1>Sistem Informasi Fasilitas Olahraga</h1>
+                <h1 class="title-page">Manajemen Fasilitas Olahraga Universitas Singaperbangsa Karawang</h1>
                 <p>Mudah • Cepat • Terjadwal</p>
                 <div class="hero-buttons">
                     <button class="btn btn-orange" onclick="switchPage('schedule')">Pesan Lapangan</button>
@@ -271,7 +279,11 @@
                     </div>
                     <p style="margin-top: 15px; font-size: 13px; color: var(--text-light); line-height: 1.5; padding: 10px; background: #e0f2fe; border-radius: 6px; border-left: 4px solid var(--secondary-blue);">
                         <i class="fa-solid fa-circle-info" style="color: var(--primary-blue); margin-right: 5px;"></i> 
-                        <strong>Aturan Booking:</strong> Anda dapat memilih beberapa jam sekaligus, namun <strong>harus pada tanggal yang sama</strong> dalam satu kali proses checkout.
+                        <strong>Aturan <em>Booking</em>:</strong> Anda dapat memilih beberapa jam sekaligus, namun <strong>harus pada tanggal yang sama</strong> dalam satu kali proses checkout.
+                    </p>
+                    <p style="margin-top: 15px; font-size: 13px; color: var(--text-light); line-height: 1.5; padding: 10px; background: #e0f2fe; border-radius: 6px; border-left: 4px solid var(--secondary-blue);">
+                        <i class="fa-solid fa-circle-info" style="color: var(--primary-blue); margin-right: 5px;"></i> 
+                        <strong>Khusus Lapangan Tenis:</strong> durasi <em>booking</em> setiap satu sesi <em>booking</em> untuk <strong>lapangan tenis</strong> adalah <strong>3 jam</strong> dan berlaku kelipatannya.
                     </p>
                 </div>
 
@@ -334,8 +346,8 @@
                 <div id="payment-section">
                     <h3 style="font-size: 16px; color: var(--primary-blue); margin-bottom: 10px;">Transfer ke Rekening:</h3>
                     <div style="padding: 15px; border: 2px solid var(--secondary-blue); border-radius: 8px; background: #eff6ff; margin-bottom: 20px;">
-                        <div style="font-weight: 700; font-size: 18px; color: var(--primary-blue);">BCA - 1234 567 890</div>
-                        <div style="font-size: 14px; color: var(--text-light);">a.n. Pengelola Sport Facility</div>
+                        <div style="font-weight: 700; font-size: 18px; color: var(--primary-blue);">Mandiri - 1730017932287</div>
+                        <div style="font-size: 14px; color: var(--text-light);">a.n. RPL 086 BLU UNSIKA</div>
                     </div>
                     
                     <div style="border-top: 2px solid var(--bg-body); padding-top: 20px;">
@@ -381,11 +393,12 @@
                 <div class="about-us">
                     <h3 style="color: var(--primary-blue); font-size: 22px; margin-bottom: 15px;">Tentang Kami</h3>
                     <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">Platform berbasis website untuk memudahkan akses informasi, jadwal, serta pemesanan fasilitas olahraga secara online. Nikmati kemudahan memesan lapangan olahraga favorit Anda kapan saja dan di mana saja.</p>
+                    <p style="color: var(--text-light); font-size: 14px; margin-bottom: 20px;">Informasi lebih lanjut hubungi : <strong>Bapak Obay - 0823 1043 2992</strong></p>
                 </div>
                 <div class="contact-info">
                     <h3 style="color: var(--primary-blue); font-size: 22px; margin-bottom: 15px;">Lokasi Lapangan</h3>
                     <div class="map-container">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126920.24009696231!2d106.75947704514574!3d-6.229746499999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0!2sJakarta!5e0!3m2!1sen!2sid!4v1699999999999!5m2!1sen!2sid" width="100%" height="100%" style="border:0;" loading="lazy"></iframe>
+                       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d38831.08241601891!2d107.28542968562063!3d-6.3397241036412275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6977ccb34822e1%3A0x6c4c7c12678610e0!2sUniversitas%20Singaperbangsa%20Karawang%20(UNSIKA)!5e0!3m2!1sid!2sid!4v1778163275098!5m2!1sid!2sid" width="600" height="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>
@@ -397,23 +410,23 @@
         // ================= STRUKTUR DATA =================
         const configLapangan = [
             { 
-                id: "Tenis", jenis: "Tenis", harga: 450000, img: "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=600&q=80", icon: "fa-table-tennis-paddle-ball",
-                fasilitas: ["Net Standar", "Kursi Wasit", "Lampu LED", "Blok 3 Jam Khusus"],
+                id: "Tenis", jenis: "Tenis", harga: 150000, img: "assets/tenis.png", icon: "fa-table-tennis-paddle-ball",
+                fasilitas: ["Net Tenis Standar", "Kursi Wasit Tinggi", "Penerangan Lampu LED 1000 Lux", "Ruang Ganti & Loker", "Hard Court"],
                 fisik: [{id: "TNS-01", nama: "Tenis 1"}, {id: "TNS-02", nama: "Tenis 2"}] 
             },
             { 
-                id: "Futsal", jenis: "Futsal", harga: 100000, img: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80", icon: "fa-futbol",
-                fasilitas: ["Gawang Standar", "Lantai Interlocking", "Papan Skor", "Lapangan Multiguna"],
+                id: "Futsal", jenis: "Futsal", harga: 100000, img: "assets/futsal.png", icon: "fa-futbol",
+                fasilitas: ["Gawang & Jaring Standar", "Penerangan Lampu LED 1000 Lux", "Hard Court"],
                 fisik: [{id: "FUT-01", nama: "Futsal Utama"}] 
             },
             { 
-                id: "Basket", jenis: "Basket", harga: 100000, img: "https://images.unsplash.com/photo-1504450758481-7338eba7524a?w=600&q=80", icon: "fa-basketball",
-                fasilitas: ["Ring Hidrolik", "Lantai Vinyl", "Papan Skor", "Lapangan Multiguna"],
+                id: "Basket", jenis: "Basket", harga: 100000, img: "assets/bg.png", icon: "fa-basketball",
+                fasilitas: ["Ring Basket Hidrolik", "Penerangan Lampu LED 1000 Lux", "Hard Court"],
                 fisik: [{id: "BSK-01", nama: "Basket Utama"}] 
             },
             { 
-                id: "Voli", jenis: "Voli", harga: 100000, img: "https://images.unsplash.com/photo-1592656094267-764a45160876?w=600&q=80", icon: "fa-volleyball",
-                fasilitas: ["Net Standar", "Tiang Portabel", "Papan Skor", "Lapangan Multiguna"],
+                id: "Voli", jenis: "Voli", harga: 100000, img: "assets/voli.png", icon: "fa-volleyball",
+                fasilitas: ["Net Standar", "Tiang Portabel", "Penerangan Lampu LED 1000 Lux", "Hard Court"],
                 fisik: [{id: "VOL-01", nama: "Voli Utama"}] 
             }
         ];
@@ -458,7 +471,7 @@
                     <div class="card-content">
                         <div>
                             <h3 class="card-title">Lapangan ${kat.jenis}</h3>
-                            <p class="card-desc">Mulai Rp ${kat.harga.toLocaleString('id-ID')}/${kat.id==="Tenis"?"3 jam":"jam"}</p>
+                            <p class="card-desc">Mulai Rp ${kat.harga.toLocaleString('id-ID')}/${kat.id==="Tenis"?"jam":"jam"}</p>
                             <ul class="card-fasilitas-list">
                                 ${kat.fasilitas.map(f => `<li>${f}</li>`).join('')}
                             </ul>
@@ -479,7 +492,8 @@
             const tabFisik = document.getElementById('sub-filter-container');
             if (currentOlahraga.fisik.length > 1) {
                 tabFisik.style.display = 'flex';
-                tabFisik.innerHTML = currentOlahraga.fisik.map(f => 
+                tabFisik.innerHTML = `<p>Pilih lapangan : </p>`;
+                tabFisik.innerHTML += currentOlahraga.fisik.map(f => 
                     `<button class="sub-tab ${f.id === currentFisik.id ? 'active' : ''}" onclick="gantiFisik('${f.id}')">${f.nama}</button>`
                 ).join('');
             } else {
